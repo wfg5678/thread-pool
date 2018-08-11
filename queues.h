@@ -196,6 +196,10 @@ is inserted in the first open space. 'to_add' is then exchanged with
 it's parent until the heap retains it's max heap property.
 */
 void binary_push_task(struct task* to_add, struct thread_pool* pool){
+
+  to_add->pointer1 = NULL;
+  to_add->pointer2 = NULL;
+  to_add->parent = NULL;
   
   if(pool->head == NULL){
 
@@ -269,7 +273,6 @@ struct task* binary_pull_task(struct thread_pool* pool){
 //====================Binomial Heap Functions======================
 /*
   For Binomial Heap functions 'pointer1' refers to the task's sibling.
-  Field????
 */
 
 /*Accepts a reference to a task, 'ref_child' that is to be made into

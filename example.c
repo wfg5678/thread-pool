@@ -1,10 +1,61 @@
-/* This example program shows how to use the functions in queue.c and
-queue.h to create a queue serviced by multiple threads. 40 tasks are
-added to the queue. Each task consists of an insert sort function that
-sorts an array of 10000 random integers. 
+/* This example program shows how to use the functions in thread_pool.c 
+and thread_pool.h to create a thread_pool that services a queue of tasks.
+
+This example consists of 4 threads in the thread pool. 40 tasks are added
+to the pool. Each task consists of using an insert sort routine to sort
+an array of between 20000 and 40000 integers. These tasks are stored in a
+Fibonacci Heap. The tasks with longer arrays have priority over the tasks
+with shorter arrays. 
+
+Here is the output from executing this program. Note that the arrays are
+sorted in descending order except for the first four. This is because the
+the threads in the thread pool grab tasks as soon as they are added. While 
+the four threads are busy with the first four tasks the rest of the tasks 
+are added. 
+
+Sorting array of length 26470.
+Sorting array of length 24847.
+Sorting array of length 25061.
+Sorting array of length 25345.
+Sorting array of length 39995.
+Sorting array of length 38913.
+Sorting array of length 38564.
+Sorting array of length 38514.
+Sorting array of length 38424.
+Sorting array of length 37957.
+Sorting array of length 37295.
+Sorting array of length 37075.
+Sorting array of length 33442.
+Sorting array of length 33382.
+Sorting array of length 33173.
+Sorting array of length 33037.
+Sorting array of length 32374.
+Sorting array of length 31444.
+Sorting array of length 30989.
+Sorting array of length 30360.
+Sorting array of length 30130.
+Sorting array of length 29768.
+Sorting array of length 29577.
+Sorting array of length 29256.
+Sorting array of length 28698.
+Sorting array of length 28592.
+Sorting array of length 26977.
+Sorting array of length 25808.
+Sorting array of length 25747.
+Sorting array of length 24378.
+Sorting array of length 24315.
+Sorting array of length 22867.
+Sorting array of length 22758.
+Sorting array of length 22264.
+Sorting array of length 21518.
+Sorting array of length 21444.
+Sorting array of length 21385.
+Sorting array of length 21336.
+Sorting array of length 20914.
+Sorting array of length 20708.
+
  */
 
-#define length 10000
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,13 +69,14 @@ struct insert_sort_info{
   int* v;
   int left;
   int right;
-  int position;
 };
 
 
-//if first argument is of greater priority return greater or equal
-//to 0.
-//if second argument is of greater priority return less than 0.
+/*
+  If first argument is of greater priority return greater or equal
+  to 0.
+  If second argument is of greater priority return less than 0.
+*/
 int compare(const void* p1, const void* p2){
 
   struct insert_sort_info* s1 = (struct insert_sort_info*)p1;
@@ -46,6 +98,8 @@ void insert_sort(void* arg){
   //to get the array to be sorted and left and right boundaries
   struct insert_sort_info* info = (struct insert_sort_info*)(arg);
 
+  printf("Sorting array of length %d.\n", info->right-info->left);
+  
   int* v = info->v;
   int left = info->left;
   int right = info->right;
@@ -67,7 +121,7 @@ void insert_sort(void* arg){
     v[j+1] = x;
     i++;
   }
-  printf("done with insert_sort of array %d. length %d\n", info->position, info->right-info->left);
+
   return;
 }
 
@@ -76,16 +130,16 @@ int main(){
 
   srand(time(NULL));
   
-  //create thread pool with 4 threads and binary heap for the tasks
-  struct thread_pool* pool = create_pool(4,3);
+  //create thread pool with 4 threads and fibonacci heap for the tasks
+  struct thread_pool* pool = create_pool(4,3,compare);
 
-  set_comparision(compare, pool);
   
   struct insert_sort_info* array[40];
   int r;
   
   for(int i=0; i<40; i++){
 
+    //get a random number between 20000 and 40000
     r = rand()%20000 + 20000;
     
     array[i] = malloc(sizeof(struct insert_sort_info));
@@ -99,11 +153,9 @@ int main(){
     //set the left and right boundaries
     array[i]->left = 0;
     array[i]->right = r-1;
-    array[i]->position = i;
    
     //add task to queue
     add_task(pool, insert_sort, (void*)(array[i]));
-
   }  
 
   destroy_pool_when_idle(pool);

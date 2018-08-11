@@ -7,7 +7,7 @@ struct thread_pool;
 FIFO (first in, first out) for task priority. This can be changed
 with the set_priority function.
  */
-struct thread_pool* create_pool(int number_threads, int mode);
+struct thread_pool* create_pool(int number_threads, int mode, int (*function)(const void* p1, const void* p2));
 
 
 /*Add addition threads to a thread pool
@@ -47,16 +47,7 @@ after return.
 void destroy_pool_when_idle(struct thread_pool* pool);
 
 
-/*queue can be set up for Last In First Out (LIFO) operation or First
-In First Out (FIFO) operation. Default is FIFO. Passing 1 to
-set_priority will change to FIFO. If already set to FIFO it will have
-no effect. Passing 0 to set_priority will switch queue to LIFO. If
-already set on LIFO it will have no effect. Any parameter other than
-0 and 1 will have no effect
- */
-void set_priority(int priority, struct thread_pool* pool);
 
-void set_comparision(int (*function)(const void* p1, const void* p2), struct thread_pool* pool);
 
 #endif /*POOL_FUNCTIONS*/
 

@@ -20,6 +20,9 @@ struct thread_info{
    pointer1 refers to a task's left sibling
    pointer2 refers to a task's right sibling
 
+   For FIFO list:
+   'pointer1' refers to 
+
 */
 struct task{
 
@@ -39,15 +42,12 @@ struct thread_pool{
   pthread_mutex_t modify_pool;
   pthread_cond_t signal_change;
   int number_threads;
-  struct task* oldest_task;
-  struct task* newest_task;
   struct task* head;
   struct task* tail;
   unsigned int num_tasks_in_queue;
   struct task* (*pull)(struct thread_pool* pool);
   void (*push)(struct task* to_add, struct thread_pool* pool);
-  int (*comp_function)(const void* p1, const void* p2);
-  int FIFO;  
+  int (*comp_function)(const void* p1, const void* p2);  
   int kill_immediately;
   int kill_when_idle;
   struct thread_info* thread_list;

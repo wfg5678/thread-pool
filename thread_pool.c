@@ -18,8 +18,7 @@ the functions.
 //Function Declarations-------------------------------------
 
 
-struct thread_pool* create_pool(int number_threads, int mode);
-void create_thread(struct thread_pool* pool);
+struct thread_pool* create_pool(int number_threads, int mode, int (*function)(const void* p1, const void* p2));
 void set_queue_mode(struct thread_pool* pool, int mode);
 void add_threads(int number_to_add, struct thread_pool* pool);
 void add_task(struct thread_pool* pool, void (*function)(void* arg), void* arg);
@@ -29,7 +28,6 @@ void close_immediately(struct thread_pool* pool);
 void close_when_idle(struct thread_pool* pool);
 void destroy_pool_immediately(struct thread_pool* pool);
 void destroy_pool_when_idle(struct thread_pool* pool);
-void set_comparision(int (*function)(const void* p1, const void* p2), struct thread_pool* pool);
 
 //Binomial Heap Functions-----------------------------------
 struct task* binomial_pull_task(struct thread_pool* pool);
@@ -74,7 +72,7 @@ void LIFO_push_task(struct task* to_add, struct thread_pool* pool);
       This allows the threads to continue working on the queue until
       empty.
 */
-struct thread_pool* create_pool(int number_threads, int mode){
+struct thread_pool* create_pool(int number_threads, int mode, int (*function)(const void* p1, const void* p2)){
   
   struct thread_pool* pool = malloc(sizeof(struct thread_pool));
 
@@ -90,9 +88,6 @@ struct thread_pool* create_pool(int number_threads, int mode){
   
   pool->number_threads = number_threads;
   
-  // pool->oldest_task = NULL;
-  // pool->newest_task = NULL;
-
   pool->head = NULL;
   pool->tail = NULL;
   
@@ -104,10 +99,21 @@ struct thread_pool* create_pool(int number_threads, int mode){
   pool->thread_list = NULL;
   
   add_threads(number_threads, pool);
+
+  pool->comp_function = function;
   
   return pool;
 }
 
+/*
+  Sets the method of storing tasks in the queue. The options are:
+
+  1. Binary Heap
+  2. Binomial Heap
+  3. Fibonacci Heap
+  4. First In First Out Queue
+  5. Last In First Out Queue
+*/
 void set_queue_mode(struct thread_pool* pool, int mode){
 
   switch(mode){
@@ -137,7 +143,7 @@ void set_queue_mode(struct thread_pool* pool, int mode){
     break;
 
   default:
-    printf("ERROR: mode selection must be int between 1 and 5.\nDefault to Binary Heap");
+    printf("ERROR: mode selection must be integer between 1 and 5.\nDefault to Binary Heap");
     pool->push = binary_push_task;
     pool->pull = binary_pull_task;
 
@@ -212,12 +218,7 @@ void add_task(struct thread_pool* pool, void (*function)(void* arg), void* arg){
   
   new_task->function = function;
   new_task->arg = arg;
-  /* 
-  new_task->order = 0;
-  new_task->sibling = NULL;
-  new_task->parent = NULL;
-  new_task->child = NULL;
-  */
+
   pthread_mutex_lock(&pool->modify_pool);
   
   pool->num_tasks_in_queue++;
@@ -408,11 +409,5 @@ void destroy_pool_immediately(struct thread_pool* pool){
   return;
 }
 
-void set_comparision(int (*function)(const void* p1, const void* p2), struct thread_pool* pool){
-
-  pool->comp_function = function;
-  return;
-}
-
-//------------------------------------------------------
+//==================================================================
 
