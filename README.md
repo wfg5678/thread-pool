@@ -27,12 +27,12 @@ $ gcc -pthread thread_pool.c my_program.c
 
 
 Examples of usage of functions provided:
-
+```c
 struct thread_pool* create_pool(
 		int number_threads,
 		int mode, 
 		int (*function)(const void* p1, const void* p2));
-
+```
 Creates a thread pool. The first parameter is the number of threads that service the pool. The second parameter specifies how the waiting tasks will be stored before execution.
 
   1 = Binary Heap
