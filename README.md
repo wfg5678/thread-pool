@@ -35,11 +35,11 @@ struct thread_pool* create_pool(
 ```
 Creates a thread pool. The first parameter is the number of threads that service the pool. The second parameter specifies how the waiting tasks will be stored before execution.
 
-  1 = Binary Heap
-  2 = Binomial Heap
-  3 = Fibonacci Heap
-  4 = First In First Out Queue
-  5 = Last In First Out Queue
+  1. Binary Heap
+  2. Binomial Heap
+  3. Fibonacci Heap
+  4. First In First Out Queue
+  5. Last In First Out Queue
 
 Any other input defaults to a Binary Heap.
 The final parameter is a pointer to a comparision function that can be used to determine which of two tasks has a higher priority. Note that this parameter should be set to NULL if tasks are stored in a FIFO or LIFO Queue. 
@@ -66,11 +66,11 @@ int compare(const void* p1, const void* p2){
 If 'compare' returns greater than 0 than the task with struct insert_sort_info1 is considered to be of greater priority than the task with insert_sort_info2. If 'compare' returns less than 0 the second parameter has greater priority than the first.
 
 ```c
-	struct thread_pool* pool = create_pool(4, 3, compare);
+struct thread_pool* pool = create_pool(4, 3, compare);
 ```
 Creates a thread pool with 4 threads backed by a Binary_Heap and priority is set by function 'compare'.
 ```c
-	struct thread_pool* pool = create_pool(4, 5, NULL);
+struct thread_pool* pool = create_pool(4, 5, NULL);
 ```
 Creates a thread pool with 4 threads backed by a LIFO Queue. No comparison function is need.
 
