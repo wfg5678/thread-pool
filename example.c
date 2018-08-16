@@ -1,17 +1,17 @@
 /* This example program shows how to use the functions in thread_pool.c 
-and thread_pool.h to create a thread_pool that services a queue of tasks.
+and thread_pool.h to create a thread pool that services a queue of tasks.
 
-This example consists of 4 threads in the thread pool. 40 tasks are added
-to the pool. Each task consists of using an insert sort routine to sort
-an array of between 20000 and 40000 integers. These tasks are stored in a
-Fibonacci Heap. The tasks with longer arrays have priority over the tasks
-with shorter arrays. 
+This example consists of a thread pool with 4 threads. 40 tasks are added
+to the pool. Each task uses an insert sort routine to sort an array of
+between 20000 and 40000 integers. These tasks are stored in a Fibonacci
+Heap. The tasks with longer arrays have priority over the tasks with
+shorter arrays. 
 
 Here is the output from executing this program. Note that the arrays are
-sorted in descending order except for the first four. This is because the
-the threads in the thread pool grab tasks as soon as they are added. While 
-the four threads are busy with the first four tasks the rest of the tasks 
-are added. 
+sorted in descending order by length except for the first four. This is
+because the the threads in the thread pool grab tasks as soon as they are
+added. While the four threads are busy with the first four tasks the rest
+of the tasks are added. 
 
 Sorting array of length 26470.
 Sorting array of length 24847.
@@ -53,14 +53,12 @@ Sorting array of length 21385.
 Sorting array of length 21336.
 Sorting array of length 20914.
 Sorting array of length 20708.
-
  */
 
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <unistd.h>
 #include "thread_pool.h"
 
 //the mechanism for passing the arguments needed for insert_sort
@@ -121,7 +119,7 @@ void insert_sort(void* arg){
     v[j+1] = x;
     i++;
   }
-
+  printf("done\n");
   return;
 }
 

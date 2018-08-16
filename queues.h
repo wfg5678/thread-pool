@@ -1,3 +1,6 @@
+#ifndef QUEUE_FUNCTIONS
+#define QUEUE_FUNCTIONS
+
 /*
 
 This header contains the functions for the different types of queues 
@@ -782,3 +785,5 @@ struct task* LIFO_pull_task(struct thread_pool* pool){
 
   return to_return;
 }
+
+#endif /*QUEUE_FUNCTIONS*/

@@ -1,12 +1,10 @@
 /* This c files holds the functions that allow for the creation of a
 thread pool. The thread pool is seeded with as many threads as the
-user desires. The threads service a queue of tasks feed into the
+user desires. The threads service a queue of tasks entered into the
 pool. See queue.h for more complete documentation on the usage of
 the functions.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <pthread.h>
 #include <errno.h>
 #include <string.h>
@@ -54,21 +52,22 @@ void LIFO_push_task(struct task* to_add, struct thread_pool* pool);
 
 
 
-/*creates an instance of a thread pool seeded with number_threads.
----modify_pool is the mutex that allows only access to the pool by
+/*
+  Creates an instance of a thread pool seeded with number_threads.
+The 'mode' parameter specifies the type of data structure for storing
+waiting tasks.
+The third parameter is a comparsion function that allows the user to
+decide the priority of tasks
+
+---'modify_pool' is the mutex that allows only access to the pool by
       one of the created threads at a time. 
----signal_change is the broadcast that tells the threads that either
+---'signal_change' is the broadcast that tells the threads that either
       a new task has been added to the queue or threads should be
       terminated.
----oldest task and newest task point to the each end of a doubly linked 
-      list of tasks in the queue.
----FIFO (first in first out) is set to 1 by default. The threads will
-      execute the first task added to the queue first. FIFO == 0
-      will change the execution to LIFO (last in first out).
----kill_immediately flag tells the threads to terminate as soon as
+---'kill_immediately' flag tells the threads to terminate as soon as
       the execution of the current task is complete. It will also
       terminate any idle theads.
----kill_when_idle flags tells the threads to terminate when idle.
+---'kill_when_idle' flags tells the threads to terminate when idle.
       This allows the threads to continue working on the queue until
       empty.
 */
@@ -87,6 +86,7 @@ struct thread_pool* create_pool(int number_threads, int mode, int (*function)(co
   pthread_cond_init(&pool->signal_change, NULL);
   
   pool->number_threads = number_threads;
+  add_threads(number_threads, pool);
   
   pool->head = NULL;
   pool->tail = NULL;
@@ -98,8 +98,6 @@ struct thread_pool* create_pool(int number_threads, int mode, int (*function)(co
   
   pool->thread_list = NULL;
   
-  add_threads(number_threads, pool);
-
   pool->comp_function = function;
   
   return pool;
@@ -154,8 +152,9 @@ void set_queue_mode(struct thread_pool* pool, int mode){
 }
     
 
-/*Creates a new thread and adds to thread_list maintained in the 
-threadpool
+/*
+  Creates a new thread and adds to thread_list maintained in the 
+thread pool.
  */
 void create_thread(struct thread_pool* pool){
 
@@ -177,8 +176,8 @@ void create_thread(struct thread_pool* pool){
   return;
 }
 
-/*Adds number_to_add threads to the thread pool
- */
+
+// Adds number_to_add threads to the thread pool
 void add_threads(int number_to_add, struct thread_pool* pool){
 
   if(pool == NULL){
@@ -233,10 +232,12 @@ void add_task(struct thread_pool* pool, void (*function)(void* arg), void* arg){
   return;
 }
 
-/*Return pointer to  oldest item in queue if FIFO == 1. Otherwise
-return newest item in queue. Manipulate pointers to remove item from
-queue.
- */
+/*
+  Return pointer to the highest priority task in queue if queue is 
+Binary Heap, Binomial Heap, or Fibonacci Heap. If queue is  FIFO 
+queue it returns a pointer to the oldest task. If LIFO it returns 
+the newest task in the queue.
+*/
 struct task* pull_task(struct thread_pool* pool){
 
   if(pool->num_tasks_in_queue == 0){

@@ -1,11 +1,11 @@
 # thread-pool
-A thread pool implemented in C with different options for storing waiting tasks
+A thread pool implemented in C with different options for storing waiting tasks.
 
-This implementation allows for the creation of a thread pool. The threads in the thread pool idle until a task is added into them. When tasks are available the threads execute them until no more tasks remain. Then the threads return to their idle state until more work is added or the thread pool is destroyed.
+This implementation allows for the creation of a thread pool using the pthread library. The threads in the thread pool idle until a task is added into the pool. When tasks are available the threads execute them until no more tasks remain. Then the threads return to their idle state until more work is added or the thread pool is destroyed.
 
-This implementation supports five different options for storing waiting tasks while waiting for an available thread. The tasks can be stored as a Binary Heap, a Binomial Heap, a Fibonacci Heap, a First In First Out Queue, or a Last In Last Out Queue. The Binary, Binomial, and Fibonacci Heap options require a comparision function that is used to determine the relative priority between two tasks. The tasks in FIFO and LIFO Queues are executed based on time entered into the queue.
+This implementation supports five different options for storing waiting tasks while waiting for an available thread. The tasks can be stored as a Binary Heap, a Binomial Heap, a Fibonacci Heap, a First In First Out Queue, or a Last In First Out Queue. The Binary, Binomial, and Fibonacci Heap options require a comparision function that is used to determine the relative priority between two tasks. The tasks in FIFO and LIFO Queues are executed based on time entered into the queue.
 
-========================================================================
+------------------------------------------------------------------------
 
 Quick overview of how to setup this implementation:
 
@@ -23,7 +23,7 @@ Compile with thread_pool.c and flag -pthread
 $ gcc -pthread thread_pool.c my_program.c 
 
 
-========================================================================
+------------------------------------------------------------------------
 
 
 Examples of usage of functions provided:
@@ -76,21 +76,23 @@ Creates a thread pool with 4 threads backed by a LIFO Queue. No comparison funct
 
 ------------------------------------------------------------------------
 ```c
-add_threads(2, pool);
+void add_threads(int number_to_add, struct thread_pool* pool);
 ```
 Adds two more threads to an existing thread pool.
-
+```c
+add_threads(2, pool);
+```
 ------------------------------------------------------------------------
 ```c
 void add_task(struct thread_pool* pool, 
 		void (*function)(void* arg),
 		void* arg);
 ```
-Adds a task into the thread pool: The add_task function takes a reference to the pool, a pointer to a function to be performed, and void* argument. This is typically a pointer to a structure that holds the arguments of the function.
+Adds a task into the thread pool: The add_task function takes a reference to the pool, a pointer to a function to be executed, and void* argument. This is typically a pointer to a structure that holds the arguments of the function.
 
 For example: given a function insert_sort that is typically declared:
 ```c
-void insert_sort(int* v, left, right);
+void insert_sort(int* v, int left, int right);
 ```
 modify declaration to:
 ```c
@@ -110,8 +112,11 @@ Then add to queue with:
 add_task(pool, insert_sort, (void*)(arguments));
 ```
 ------------------------------------------------------------------------
-
-Destroy the thread pool when no longer needed. There are two options for this. destroy_pool_immediately destroys the thread pool even if there are tasks still in the queue. destroy_pool_when_idle allows the thread pool to continue to service the queue until queue is empty. Then the threads are terminated.
+```c
+void destroy_pool_immediately(struct thread_pool* pool);
+void destroy_pool_when_idle(struct thread_pool* pool);
+```
+Destroy the thread pool when no longer needed. There are two options for this. 'destroy_pool_immediately' destroys the thread pool even if there are tasks still in the queue. 'destroy_pool_when_idle' allows the thread pool to continue to service the queue until queue is empty. Then the threads are terminated.
 ```c
 destroy_pool_immediately(pool);
 destroy_pool_when_idle(pool);
