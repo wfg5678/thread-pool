@@ -119,7 +119,7 @@ void insert_sort(void* arg){
     v[j+1] = x;
     i++;
   }
-  printf("done\n");
+
   return;
 }
 

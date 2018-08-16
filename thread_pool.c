@@ -5,6 +5,7 @@ pool. See queue.h for more complete documentation on the usage of
 the functions.
 */
 
+
 #include <pthread.h>
 #include <errno.h>
 #include <string.h>
@@ -84,6 +85,8 @@ struct thread_pool* create_pool(int number_threads, int mode, int (*function)(co
   
   pthread_mutex_init(&pool->modify_pool, NULL);
   pthread_cond_init(&pool->signal_change, NULL);
+
+  pool->thread_list = NULL;
   
   pool->number_threads = number_threads;
   add_threads(number_threads, pool);
@@ -95,8 +98,6 @@ struct thread_pool* create_pool(int number_threads, int mode, int (*function)(co
  
   pool->kill_immediately = 0;
   pool->kill_when_idle = 0;
-  
-  pool->thread_list = NULL;
   
   pool->comp_function = function;
   
